@@ -201,6 +201,7 @@ void QuicStream::WriteOrBufferData(
     QuicStringPiece data,
     bool fin,
     QuicReferenceCountedPointer<QuicAckListenerInterface> ack_listener) {
+
   if (data.empty() && !fin) {
     QUIC_BUG << "data.empty() && !fin";
     return;
@@ -215,11 +216,12 @@ void QuicStream::WriteOrBufferData(
                      << "Attempt to write when the write side is closed";
     return;
   }
-
+  
   QuicConsumedData consumed_data(0, false);
   fin_buffered_ = fin;
 
   if (session_->save_data_before_consumption()) {
+    QUIC_LOG(ERROR) << "call WriteOrBufferData 1";
     bool had_buffered_data = HasBufferedData();
     // Do not respect buffered data upper limit as WriteOrBufferData guarantees
     // all data to be consumed.
@@ -227,6 +229,7 @@ void QuicStream::WriteOrBufferData(
       struct iovec iov(MakeIovec(data));
       QuicIOVector quic_iov(&iov, 1, data.length());
       QuicStreamOffset offset = send_buffer_.stream_offset();
+      QUIC_LOG(ERROR) << "save stream data";
       send_buffer_.SaveStreamData(quic_iov, 0, data.length());
       OnDataBuffered(offset, data.length(), ack_listener);
     }
@@ -234,12 +237,15 @@ void QuicStream::WriteOrBufferData(
       // Write data if there is no buffered data before.
       QUIC_FLAG_COUNT_N(quic_reloadable_flag_quic_save_data_before_consumption2,
                         2, 4);
+      QUIC_LOG(ERROR) << "call WriteBufferedData 2";
       WriteBufferedData();
     }
     return;
   }
+  
 
   if (queued_data_.empty()) {
+    QUIC_LOG(ERROR) << "call WriteOrBufferData 3";
     struct iovec iov(MakeIovec(data));
     consumed_data = WritevData(&iov, 1, fin, ack_listener);
     DCHECK_LE(consumed_data.bytes_consumed, data.length());
@@ -248,6 +254,7 @@ void QuicStream::WriteOrBufferData(
   // If there's unconsumed data or an unconsumed fin, queue it.
   if (consumed_data.bytes_consumed < data.length() ||
       (fin && !consumed_data.fin_consumed)) {
+    QUIC_LOG(ERROR) << "call WriteOrBufferData 4";
     QuicStringPiece remainder(data.substr(consumed_data.bytes_consumed));
     queued_data_bytes_ += remainder.size();
     queued_data_.emplace_back(remainder.as_string(), ack_listener);

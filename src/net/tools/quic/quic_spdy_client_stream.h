@@ -48,6 +48,8 @@ class QuicSpdyClientStream : public QuicSpdyStream {
   // returns the number of bytes sent.
   size_t SendRequest(SpdyHeaderBlock headers, QuicStringPiece body, bool fin);
 
+  void SetPostFile(std::string file_name){post_file_ = file_name;};
+
   // Returns the response data.
   const std::string& data() { return data_; }
 
@@ -74,6 +76,7 @@ class QuicSpdyClientStream : public QuicSpdyStream {
   int64_t content_length_;
   int response_code_;
   std::string data_;
+  std::string post_file_;
   size_t header_bytes_read_;
   size_t header_bytes_written_;
 

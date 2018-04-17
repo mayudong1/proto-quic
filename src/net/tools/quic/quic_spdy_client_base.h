@@ -85,6 +85,8 @@ class QuicSpdyClientBase : public QuicClientBase,
   // initialization.
   void InitializeSession() override;
 
+  void SetPostFile(std::string file_name){post_file_ = file_name;};
+
   // Sends an HTTP request and does not wait for response before returning.
   void SendRequest(const SpdyHeaderBlock& headers,
                    QuicStringPiece body,
@@ -197,6 +199,8 @@ class QuicSpdyClientBase : public QuicClientBase,
   std::string latest_response_body_;
   // HTTP/2 trailers from most recent response.
   std::string latest_response_trailers_;
+
+  std::string post_file_;
 
   // Listens for full responses.
   std::unique_ptr<ResponseListener> response_listener_;

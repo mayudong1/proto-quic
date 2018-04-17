@@ -105,6 +105,8 @@ bool FLAGS_redirect_is_success = true;
 // Initial MTU of the connection.
 int32_t FLAGS_initial_mtu = 0;
 
+string FLAGS_post_file = "";
+
 class FakeProofVerifier : public ProofVerifier {
  public:
   net::QuicAsyncStatus VerifyProof(
@@ -210,6 +212,9 @@ int main(int argc, char* argv[]) {
       return 1;
     }
   }
+  if (line->HasSwitch("post_file")){
+    FLAGS_post_file = line->GetSwitchValueASCII("post_file");
+  }
 
   VLOG(1) << "server host: " << FLAGS_host << " port: " << FLAGS_port
           << " body: " << FLAGS_body << " headers: " << FLAGS_headers
@@ -274,6 +279,7 @@ int main(int argc, char* argv[]) {
   }
   net::QuicSimpleClient client(net::QuicSocketAddress(ip_addr, port), server_id,
                                versions, std::move(proof_verifier));
+  client.SetPostFile(FLAGS_post_file);
   client.set_initial_max_packet_length(
       FLAGS_initial_mtu != 0 ? FLAGS_initial_mtu : net::kDefaultMaxPacketSize);
   if (!client.Initialize()) {

@@ -117,7 +117,9 @@ void QuicSpdyClientBase::SendRequest(const SpdyHeaderBlock& headers,
     QUIC_BUG << "stream creation failed!";
     return;
   }
+  stream->SetPostFile(post_file_);
   stream->SendRequest(headers.Clone(), body, fin);
+  QUIC_LOG(ERROR) << "stream->SendRequest() over";
   // Record this in case we need to resend.
   MaybeAddDataToResend(headers, body, fin);
 }

@@ -164,7 +164,6 @@ bool QuicClientBase::WaitForEvents() {
   DCHECK(connected());
 
   network_helper_->RunEventLoop();
-
   DCHECK(session() != nullptr);
   if (!connected() &&
       session()->error() == QUIC_CRYPTO_HANDSHAKE_STATELESS_REJECT) {

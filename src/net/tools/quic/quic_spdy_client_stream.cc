@@ -138,9 +138,26 @@ size_t QuicSpdyClientStream::SendRequest(SpdyHeaderBlock headers,
       WriteHeaders(std::move(headers), send_fin_with_headers, nullptr);
   bytes_sent += header_bytes_written_;
 
-  if (!body.empty()) {
-    WriteOrBufferData(body, fin, nullptr);
+  FILE* pFile = fopen(post_file_.c_str(), "rb");
+  char buffer[4096] = {0};
+  while(pFile != NULL) {
+    int num = fread(buffer, 1, 4096, pFile);
+    if(num == 4096){
+      string str = string(buffer, num);
+      WriteOrBufferData(str, false, nullptr);
+      bytes_sent += num;
+    }
+    else {
+      string str = string(buffer, num);
+      WriteOrBufferData(str, true, nullptr);
+      bytes_sent += num;
+      fclose(pFile);
+      break;
+    }
   }
+  // if (!body.empty()) {
+  //   WriteOrBufferData(body, fin, nullptr);
+  // }
 
   return bytes_sent;
 }
